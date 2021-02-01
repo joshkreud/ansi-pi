@@ -1,0 +1,6 @@
+groupname:
+  hosts:
+    supercoolhostname:
+      ansible_host: 00.00.00.00
+      ansible_user: deployer
+      initial_user: depl

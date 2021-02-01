@@ -1,0 +1,27 @@
+---
+- name: Maybe create user
+  hosts: all
+  # gather_facts must be disabled here to use this role
+  gather_facts: no
+  become: true
+
+  pre_tasks:
+    - name: Update all packages to their latest version
+      apt:
+        name: "*"
+        update_cache: yes
+        state: latest
+
+  roles:
+    - geerlingguy.pip
+    - maybecreateuser
+
+  tasks:
+    - name: reset ssh connection
+      meta: reset_connection
+
+- name: Lockdown
+  hosts: all
+  become: true
+  roles:
+    - lockdown
