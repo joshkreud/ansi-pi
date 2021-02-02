@@ -5,9 +5,8 @@
   gather_facts: no
   become: true
   roles:
-    - bootstrap
-    - geerlingguy.pip
     - maybecreateuser
+    - bootstrap
 
   tasks:
     - name: reset ssh connection

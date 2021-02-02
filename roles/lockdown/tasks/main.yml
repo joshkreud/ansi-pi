@@ -17,3 +17,6 @@
     backup: yes
   notify:
     - restart ssh
+
+- name: flush handlers
+  meta: flush_handlers
