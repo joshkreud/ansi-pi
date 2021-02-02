@@ -1,0 +1,17 @@
+---
+- name: Install Unbound Recursive DNS
+  apt:
+    name: "unbound"
+    state: present
+
+- name: Template Unbound Config
+  template:
+    src: unbound-pihole.conf.j2
+    dest: /etc/unbound/unbound.conf.d/pi-hole.conf
+  notify: Restart Unbound
+
+- name: Disable Ubound Resolved
+  service:
+    name: unbound-resolvconf
+    state: stopped
+    enabled: no

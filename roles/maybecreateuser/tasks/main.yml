@@ -13,7 +13,7 @@
     - block:
         - name: "Wait for Connection on Initial User {{ ansible_user }}"
           wait_for_connection:
-            timeout: 3
+            timeout: 2
       rescue:
         - meta: clear_host_errors
         - meta: end_play

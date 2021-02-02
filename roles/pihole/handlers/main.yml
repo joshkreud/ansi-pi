@@ -1,0 +1,8 @@
+- name: Restart Unbound
+  service:
+    name: unbound
+    state: restarted
+
+- name: Pihole reload
+  command: "pihole -g"
+  when: pihole_installed

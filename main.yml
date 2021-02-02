@@ -6,6 +6,9 @@
   become: true
 
   pre_tasks:
+    - name: Set a hostname
+      hostname:
+        name: "{{ inventory_hostname }}"
     - name: Update all packages to their latest version
       apt:
         name: "*"
@@ -25,3 +28,4 @@
   become: true
   roles:
     - lockdown
+    - pihole
