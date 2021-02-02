@@ -4,18 +4,8 @@
   # gather_facts must be disabled here to use this role
   gather_facts: no
   become: true
-
-  pre_tasks:
-    - name: Set a hostname
-      hostname:
-        name: "{{ inventory_hostname }}"
-    - name: Update all packages to their latest version
-      apt:
-        name: "*"
-        update_cache: yes
-        state: latest
-
   roles:
+    - bootstrap
     - geerlingguy.pip
     - maybecreateuser
 

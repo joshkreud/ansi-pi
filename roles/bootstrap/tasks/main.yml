@@ -1,0 +1,10 @@
+---
+- name: Set a hostname
+  hostname:
+    name: "{{ inventory_hostname }}"
+
+- name: Update all packages to their latest version
+  apt:
+    name: "*"
+    update_cache: yes
+    state: latest
