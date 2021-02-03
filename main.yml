@@ -1,13 +1,11 @@
 ---
-- name: Maybe create user
+- name: Provision Initial User
   hosts: all
-  # gather_facts must be disabled here to use this role
   gather_facts: no
   become: true
   roles:
-    - maybecreateuser
+    - maybecreateuser # gather_facts must be disabled here to use this role
     - bootstrap
-
   tasks:
     - name: reset ssh connection
       meta: reset_connection
@@ -17,4 +15,9 @@
   become: true
   roles:
     - lockdown
+
+- name: Pihole
+  hosts: bpi1
+  become: true
+  roles:
     - pihole
