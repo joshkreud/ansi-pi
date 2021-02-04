@@ -1,6 +1,6 @@
 ---
 - name: "Register username var"
-  set_fact:
+  ansible.builtin.set_fact:
     username: "{{ ansible_user }}"
 
 # Test if the original ansible_user can SSH in or not.

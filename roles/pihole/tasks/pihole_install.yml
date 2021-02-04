@@ -9,7 +9,8 @@
     path: /usr/local/bin/pihole
   register: pihole_binary
 
-- set_fact:
+- name: Remembber Install Status
+  ansible.builtin.set_fact:
     pihole_installed: "{{ pihole_binary.stat.exists | default(false) }}"
 
 - name: copy pihole conf

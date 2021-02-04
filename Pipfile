@@ -16,5 +16,5 @@ black = "*"
 [requires]
 python_version = "3"
 
-[pipenv]
+[pipenv]# For Black
 allow_prereleases = true
