@@ -17,7 +17,7 @@
     - lockdown
 
 - name: Pihole
-  hosts: bpi1
+  hosts: pihole
   become: true
   roles:
     - pihole
