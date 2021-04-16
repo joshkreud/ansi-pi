@@ -8,3 +8,5 @@
     name: "*"
     update_cache: yes
     state: latest
+  tags:
+    - update

@@ -12,9 +12,11 @@
 
 - name: Lockdown
   hosts: all
-  become: true
   roles:
-    - lockdown
+    - role: lockdown
+      become: true # Run as Root
+      tags:
+        - lockdown
 
 - name: Pihole
   hosts: pihole
