@@ -1,5 +1,13 @@
 ---
 - name: restart ssh
-  service:
-    name: sshd
-    state: restarted
+  block:
+    - name: Restart SSHd
+      service:
+        name: sshd
+        state: restarted
+    - name: reset ssh connection
+      meta: reset_connection
+
+- name: restart ufw
+  community.general.ufw:
+    state: reloaded

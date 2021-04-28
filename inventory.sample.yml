@@ -2,6 +2,8 @@ groupname:
   hosts:
     pihole:
       ansible_host: 00.00.00.00
+      initial_user: root
       ansible_user: deployer
-      initial_user: depl
-      pihole_webpassword: hodes123
+      ansible_user_pubkeys: |
+        ssh-rsa AAAAB3NzaC1yc2FGbjsAE3VnCdJprM= yoshi@-afwefw
+      pihole_webpassword: shahash

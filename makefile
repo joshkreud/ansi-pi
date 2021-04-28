@@ -1,5 +1,5 @@
 bootstrap:
-	ansible-playbook -i inventory.yml -k -K main.yml
+	pipenv run ansible-playbook -i inventory.yml --ask-pass --ask-become-pass main.yml
 
 run:
-	ansible-playbook -i inventory.yml main.yml
+	pipenv run ansible-playbook -i inventory.yml main.yml

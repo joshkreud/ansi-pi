@@ -5,21 +5,20 @@
   become: true
   roles:
     - maybecreateuser # gather_facts must be disabled here to use this role
-    - bootstrap
-  tasks:
-    - name: reset ssh connection
-      meta: reset_connection
 
-- name: Lockdown
+- name: Basic Provision
   hosts: all
+  become: true
   roles:
+    - role: bootstrap
+      tags:
+        - bootstrap
     - role: lockdown
-      become: true # Run as Root
       tags:
         - lockdown
 
 - name: Pihole
-  hosts: pihole
+  hosts: pihole1
   become: true
   roles:
     - pihole

@@ -1,7 +1,17 @@
 ---
+- name: Set timezone
+  community.general.timezone:
+    name: "{{ TIME_ZONE }}"
+
 - name: Set a hostname
   hostname:
     name: "{{ inventory_hostname }}"
+
+- name: packages | ensure apt list dir exists
+  file:
+    path: /var/lib/apt/lists/
+    state: directory
+    mode: 0755
 
 - name: Update all packages to their latest version
   apt:
@@ -10,3 +20,10 @@
     state: latest
   tags:
     - update
+
+- name: Install Packages
+  ansible.builtin.package:
+    name:
+      - git
+      - build-essential
+    state: latest

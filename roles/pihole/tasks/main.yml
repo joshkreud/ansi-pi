@@ -1,5 +1,5 @@
 ---
-- name: Install PiHole
-  include_tasks: pihole_install.yml
 - name: Install Unbound
   include_tasks: unbound_install.yml
+- name: Install PiHole
+  include_tasks: pihole_install.yml

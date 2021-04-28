@@ -20,7 +20,7 @@
 - name: Add authorized key
   authorized_key:
     user: "{{ username }}"
-    key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+    key: "{{ ansible_user_pubkeys }}"
     exclusive: yes
 
 - name: Allow sudo for ansible

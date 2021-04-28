@@ -1,5 +1,6 @@
 ---
-- include_tasks: lockdown_ssh.yml
+- include_tasks: ssh_lockdown.yml
+- include_tasks: ufw_lockdown.yml
 
 - name: flush handlers
   meta: flush_handlers
