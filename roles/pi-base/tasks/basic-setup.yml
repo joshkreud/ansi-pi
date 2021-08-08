@@ -1,0 +1,54 @@
+---
+- name: Set timezone
+  community.general.timezone:
+    name: "{{ time_zone }}"
+
+- name: Set Hostname
+  when: hostname is defined
+  hostname:
+    name: "{{ hostname }}"
+  notify: Reboot System
+
+- name: Make Bashcompletion on anible user case insensitive
+  lineinfile:
+    path: /etc/inputrc
+    regexp: "^set completion-ignore-case"
+    line: set completion-ignore-case On
+
+- name: add a vm.overcommit_memory setting at the end of the sysctl.conf # For Redis
+  sysctl:
+    name: vm.overcommit_memory
+    value: "1"
+    state: present
+    reload: yes
+
+- name: packages | ensure apt list dir exists
+  file:
+    path: /var/lib/apt/lists/
+    state: directory
+    mode: 0755
+
+- name: Update Apt Cache
+  apt:
+    update_cache: yes
+
+- name: Install Basic Packages
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - "git"
+    - "tree"
+    - "iotop"
+    - "tmux"
+    - "htop"
+    - "build-essential"
+    - "acl" #To prevent some ansible permission errors
+
+- name: Update all packages to their latest version
+  apt:
+    update_cache: yes
+    upgrade: "yes"
+  tags:
+    - never
+    - apt-upgrade

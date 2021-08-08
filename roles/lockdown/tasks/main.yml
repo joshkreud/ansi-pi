@@ -1,5 +1,0 @@
----
-- include_tasks: lockdown_ssh.yml
-
-- name: flush handlers
-  meta: flush_handlers

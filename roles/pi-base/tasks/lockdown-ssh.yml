@@ -18,3 +18,12 @@
     backup: yes
   notify:
     - restart ssh
+
+- name: Make sure SSH Agent forwarding also works on sudo
+  lineinfile:
+    dest: /etc/sudoers
+    insertafter: '^#?\s*Defaults\s+env_keep\b'
+    line: 'Defaults    env_keep += "SSH_AUTH_SOCK"'
+    state: present
+    backup: yes
+  notify: reset ssh connection

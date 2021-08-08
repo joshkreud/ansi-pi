@@ -1,0 +1,64 @@
+---
+- name: "Register username var"
+  set_fact:
+    username: "{{ ansible_user }}"
+
+- name: "Ensure Initial_User"
+  set_fact:
+    initial_user: "{{ initial_user | default('root') }}"
+
+- name: "Check if User '{{ ansible_user }}' exists"
+  vars:
+    ansible_ssh_pass: "" #Clear password variables if they were supplied
+    ansible_become_pass: ""
+  block:
+    - name: "Wait for Connection on User {{ ansible_user }}"
+      wait_for_connection:
+        timeout: 2
+      no_log: false
+    - set_fact:
+        needs_init: false
+  rescue:
+    - set_fact:
+        needs_init: true
+
+- name: Create New user
+  when: needs_init
+  vars:
+    ansible_user: "{{ initial_user }}"
+  block:
+    - name: Create new user
+      become: yes
+      import_tasks: createuser.yml
+      failed_when: false
+
+- name: Flush Handlers
+  meta: flush_handlers
+
+- name: Make sure further ssh connections dont use passwords
+  set_fact:
+    ansible_ssh_pass: ""
+    ansible_become_pass: ""
+
+- name: reset ssh connection
+  meta: reset_connection
+
+- name: Ensure Authorized Keys
+  authorized_key:
+    user: "{{ ansible_user }}"
+    key: "{{ ansible_user_pubkeys }}"
+    exclusive: yes
+  when: ansible_user_pubkeys is defined
+  notify: restart sshd
+
+- name: "Remove Default user {{ initial_user }}"
+  become: yes
+  user:
+    name: "{{ initial_user }}"
+    state: absent
+    remove: yes
+    force: true
+  when: initial_user not in  ["root","vagrant"] and remove_initial_user
+
+- name: reset ssh connection
+  meta: reset_connection
