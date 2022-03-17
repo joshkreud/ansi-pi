@@ -6,6 +6,7 @@
     line: "PasswordAuthentication no"
     state: present
     backup: yes
+  when: lockdown_ssh_disable_password_auth
   notify:
     - restart ssh
 
@@ -16,14 +17,27 @@
     line: "PermitRootLogin no"
     state: present
     backup: yes
+  when: lockdown_ssh_disable_root_login
+  notify:
+    - restart ssh
+
+- name: SSH Enable Agent forwarding
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: "^AllowAgentForwarding"
+    line: "AllowAgentForwarding yes"
+    state: present
+    backup: yes
   notify:
     - restart ssh
 
 - name: Make sure SSH Agent forwarding also works on sudo
   lineinfile:
-    dest: /etc/sudoers
-    insertafter: '^#?\s*Defaults\s+env_keep\b'
+    dest: /etc/sudoers.d/ssh_key_forward
     line: 'Defaults    env_keep += "SSH_AUTH_SOCK"'
     state: present
     backup: yes
+    validate: "visudo -cf %s"
+    mode: 0440
+    create: yes
   notify: reset ssh connection

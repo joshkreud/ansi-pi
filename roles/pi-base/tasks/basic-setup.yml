@@ -4,10 +4,7 @@
     name: "{{ time_zone }}"
 
 - name: Set Hostname
-  when: hostname is defined
-  hostname:
-    name: "{{ hostname }}"
-  notify: Reboot System
+  import_tasks: basic-setup-hostname.yml
 
 - name: Make Bashcompletion on anible user case insensitive
   lineinfile:
@@ -30,6 +27,7 @@
 
 - name: Update Apt Cache
   apt:
+    cache_valid_time: 3600
     update_cache: yes
 
 - name: Install Basic Packages
@@ -52,3 +50,16 @@
   tags:
     - never
     - apt-upgrade
+
+- name: Set Max journal log size
+  lineinfile:
+    path: /etc/systemd/journald.conf
+    line: SystemMaxUse=200M
+  notify: restart journald
+
+- name: Set includedir in sudoers
+  lineinfile:
+    dest: /etc/sudoers
+    line: "#includedir /etc/sudoers.d"
+    state: present
+    validate: "/usr/sbin/visudo -cf %s"

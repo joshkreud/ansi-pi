@@ -1,7 +1,7 @@
 ---
-# When using this role from the maybecreateuser role, gather_facts must be
+# When using this role, gather_facts must be
 # disabled at the playbook level to avoid initialization problems.
-# Ensure the facts are gathered now, since we need them.
+# Ensure the facts are gathered now.
 
 - name: "gather facts"
   setup:

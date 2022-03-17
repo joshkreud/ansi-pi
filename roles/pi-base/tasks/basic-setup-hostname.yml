@@ -1,0 +1,34 @@
+---
+- name: updating hostname {{ hostname }} (1/2)
+  when: hostname is defined
+  become: yes
+  hostname:
+    name: "{{ hostname }}"
+  notify: Reboot System
+
+- name: updating hostname {{ hostname }} (2/2)
+  when: hostname is defined
+  become: yes
+  copy:
+    content: "{{ hostname }}{{'\n'}}"
+    dest: /etc/hostname
+    backup: true
+    mode: 0655
+    owner: root
+  notify: Reboot System
+
+- name: update /etc/hosts
+  when: hostname is defined
+  become: yes
+  lineinfile:
+    dest: /etc/hosts
+    regexp: '^127\.0\.0\.1'
+    line: "127.0.0.1        {{ hostname }}"
+    backup: true
+    state: present
+    mode: 0655
+    owner: root
+  notify: Reboot System
+
+- name: Flush Handlers
+  meta: flush_handlers

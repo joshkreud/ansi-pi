@@ -5,20 +5,29 @@
   when: ansible_os_family == "Debian"
 
 - name: Reboot System
+  become: yes
   reboot:
     reboot_timeout: 1800
 
 - name: restart ssh
+  become: yes
   service:
     name: sshd
     state: restarted
   register: restart_result
 
 - name: restart ufw
+  become: yes
   community.general.ufw:
     state: reloaded
 
 - name: reset ssh connection # To enforce group changes
   meta: reset_connection
-  ignore_errors: True
+  failed_when: False
   when: restart_result is not defined
+
+- name: restart journald
+  become: yes
+  service:
+    name: systemd-journald.service
+    state: restarted

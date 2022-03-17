@@ -1,2 +1,5 @@
 ---
 time_zone: Europe/Berlin
+lockdown_ssh_disable_password_auth: false
+lockdown_ssh_disable_root_login: true
+lockdown_ufw_enable: yes
