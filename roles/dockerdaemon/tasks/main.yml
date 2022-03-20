@@ -1,0 +1,17 @@
+---
+- name: ensure Pip Packages installed
+  become: yes
+  import_role:
+    name: geerlingguy.pip
+  vars:
+    pip_install_packages:
+      - name: jsondiff
+      - name: pyyaml
+      - name: docker-compose
+
+- name: ensure Docker Installed
+  become: yes
+  import_role:
+    name: geerlingguy.docker
+  vars:
+    docker_install_compose: false
