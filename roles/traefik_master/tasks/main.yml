@@ -1,0 +1,87 @@
+---
+- name: Set Facts
+  set_fact:
+    stack_folder: /opt/traefik_master
+
+- name: Ensure stack_folder
+  become: yes
+  ansible.builtin.file:
+    path: "{{ stack_folder }}"
+    state: directory
+    owner: "{{ ansible_user }}"
+    mode: 0770
+
+- name: Copy Docker-Compose.yml
+  template:
+    src: docker-compose.yml.j2
+    dest: "{{ stack_folder }}/docker-compose.yml"
+    mode: 0600
+    owner: "{{ ansible_user }}"
+
+- name: Copy .env
+  template:
+    src: .env.j2
+    dest: "{{ stack_folder }}/.env"
+    mode: 0600
+    owner: "{{ ansible_user }}"
+
+- name: Ensure Volume Folders Exists
+  become: yes
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ ansible_user }}"
+    mode: 0770
+  loop:
+    - "{{ traefik_master_docker_volumes_dir }}/traefik/dynamic"
+    - "{{ traefik_master_docker_volumes_dir }}/authelia"
+    - "{{ traefik_master_docker_volumes_dir }}/static"
+    - "{{ traefik_master_docker_volumes_dir }}/redis"
+
+- name: Copy Traefik Dynamic Conf
+  template:
+    src: traefik-dynamic.yml.j2
+    dest: "{{ traefik_master_docker_volumes_dir }}/traefik/dynamic/dynamic.yml"
+    mode: 0600
+    owner: "{{ ansible_user }}"
+
+- name: Copy Traefik Static Conf
+  template:
+    src: traefik-static.yml.j2
+    dest: "{{ traefik_master_docker_volumes_dir }}/traefik/traefik.yml"
+    mode: 0600
+    owner: "{{ ansible_user }}"
+
+- name: Copy Authelia Conf
+  template:
+    src: authelia_config.yml.j2
+    dest: "{{ traefik_master_docker_volumes_dir }}/authelia/configuration.yml"
+    mode: 0600
+    owner: "{{ ansible_user }}"
+
+- name: Install ddclient
+  become: yes
+  package:
+    name: ddclient
+    state: present
+  when: ddclient_config is defined
+
+- name: Copy ddclient Conf
+  become: yes
+  blockinfile:
+    path: /etc/ddclient.conf
+    block: "{{ ddclient_config }}"
+    create: yes
+    owner: root
+    mode: 0600
+  when: ddclient_config is defined
+
+- name: Ddclient Cron
+  become: yes
+  when: ddclient_config is defined
+  ansible.builtin.cron:
+    name: "Ddclient"
+    job: /usr/sbin/ddclient --force
+    state: present
+    minute: "2"
+    hour: "/1"

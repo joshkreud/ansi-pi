@@ -1,0 +1,194 @@
+version: "3.5"
+
+secrets:
+  jwt:
+    file: ${CONF_DIR}/authelia/secrets/jwt
+  session:
+    file: ${CONF_DIR}/authelia/secrets/session
+  redis_password:
+    file: ${CONF_DIR}/redis/auth/secrets/pass
+
+services:
+  authelia:
+    image: authelia/authelia
+    container_name: authelia
+    depends_on:
+      - redis
+    secrets:
+      - jwt
+      - session
+      - redis_password
+    volumes:
+      - ${CONF_DIR}/authelia:/config
+    networks:
+      traefik_int:
+        ipv4_address: 172.18.0.5
+    expose:
+      - 9091
+    restart: unless-stopped
+    environment:
+      - AUTHELIA_JWT_SECRET_FILE=/run/secrets/jwt
+      - AUTHELIA_SESSION_SECRET_FILE=/run/secrets/session
+      - AUTHELIA_SESSION_REDIS_PASSWORD_FILE=/run/secrets/redis_password
+      - TZ=${TZ}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.authelia.rule=Host(`auth.${DOMAINNAME}`)"
+      - "traefik.http.routers.authelia.entrypoints=websecure"
+      - "traefik.http.routers.authelia.middlewares=secheader@file"
+      - "traefik.docker.network=traefik_int"
+
+  redis:
+    image: "redis"
+    secrets:
+      - redis_password
+    container_name: authelia_redis
+    restart: unless-stopped
+    expose:
+      - 6379
+    command:
+      [
+        "sh",
+        "-c",
+        'redis-server /usr/local/etc/redis/redis.conf --appendonly yes --requirepass "$$(cat /run/secrets/redis_password)"',
+      ]
+    volumes:
+      - ${CONF_DIR}/redis/auth/dat:/redis_data
+      - ${CONF_DIR}/redis/auth/redis.conf:/usr/local/etc/redis/redis.conf
+    environment:
+      - REDIS_REPLICATION_MODE=master
+    networks:
+      traefik_int:
+        ipv4_address: 172.18.0.6
+
+  dockerproxy_traefik:
+    container_name: docker_socket_proxy_traefik
+    image: tecnativa/docker-socket-proxy:latest
+    restart: always
+    networks:
+      - traefik_sock
+    logging:
+      driver: none
+    expose:
+      - 2375
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    environment:
+      - LOG_LEVEL=info # debug,info,notice,warning,err,crit,alert,emerg
+      ## Granted by Default
+      - EVENTS=1
+      - PING=1
+      - VERSION=1
+      ## Revoked by Default
+      # Not always needed
+      - CONTAINERS=1 # Traefik, portainer, etc.
+
+  traefik:
+    hostname: traefik
+    image: traefik:2.6
+    container_name: traefik
+    restart: always
+    environment:
+      - CF_API_EMAIL
+      - CF_API_KEY
+    depends_on:
+      - dockerproxy_traefik
+      - authelia
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      # create these toml files first
+      - ${CONF_DIR}/traefik/acme:/etc/traefik/acme
+      - ${CONF_DIR}/traefik/dynamic/dynamic.yml:/etc/traefik/conf/dynamic.yml
+      - ${CONF_DIR}/traefik/traefik.yml:/etc/traefik/traefik.yml
+      - ${CONF_DIR}/traefik/auth:/etc/traefik/auth
+      - ${CONF_DIR}/traefik/log:/var/log
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      traefik_sock: null
+      traefik_int:
+        ipv4_address: 172.18.0.2
+      smarthome_traefik:
+        ipv4_address: 172.20.0.2
+      monitor_traefik:
+        ipv4_address: 172.25.0.2
+    extra_hosts:
+      - host.docker.internal:172.17.0.1
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+      - traefik.enable=true
+
+      # Traefik Dashboard
+      - traefik.http.routers.traefik.entrypoints=websecure
+      - traefik.http.routers.traefik.rule=Host(`traefik.${DOMAINNAME}`)
+      - traefik.http.routers.traefik.service=api@internal
+      - traefik.http.routers.traefik.middlewares=authelia@file,secheader@file
+      - traefik.http.services.traefik.loadbalancer.server.port=8080
+      - traefik.http.services.traefik.loadbalancer.server.scheme=http
+
+  public:
+    image: traefik/whoami
+    container_name: public
+    networks:
+      traefik_int:
+        ipv4_address: 172.18.0.15
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.public.rule=Host(`public.${DOMAINNAME}`)"
+      - "traefik.http.routers.public.entrypoints=websecure"
+      - "traefik.http.routers.public.middlewares=authelia@file,secheader@file"
+      - traefik.docker.network=traefik_int
+    expose:
+      - 80
+    restart: unless-stopped
+
+  staticroot:
+    image: nginx:alpine
+    container_name: static_file_root
+    networks:
+      traefik_int:
+        ipv4_address: 172.18.0.16
+    volumes:
+      - ${CONF_DIR}/static:/usr/share/nginx/html:ro
+    expose:
+      - 80
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.static.rule=Host(`${DOMAINNAME}`)"
+      - "traefik.http.routers.static.entrypoints=websecure"
+      - "traefik.http.routers.static.middlewares=authelia@file,secheader@file"
+      - traefik.docker.network=traefik_int
+
+networks:
+  traefik_sock:
+    driver: bridge
+    name: traefik_sock
+
+  traefik_int:
+    driver: bridge
+    name: traefik_int
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.18.0.1/24
+
+  smarthome_traefik:
+    driver: bridge
+    name: smarthome_traefik
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.20.0.1/24
+
+  monitor_traefik:
+    driver: bridge
+    name: monitor_traefik
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.25.0.1/24

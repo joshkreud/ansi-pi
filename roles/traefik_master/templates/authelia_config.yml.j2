@@ -1,0 +1,92 @@
+###############################################################
+#                   Authelia configuration                    #
+###############################################################
+
+server:
+  host: 0.0.0.0
+  port: 9091
+log:
+  level: info
+default_redirection_url: https://public.{{ traefik_master_main_domain }}
+totp:
+  issuer: authelia.com
+
+authentication_backend:
+  disable_reset_password: true
+  file:
+    path: /config/users_database.yml
+    password:
+      algorithm: argon2id
+      iterations: 1
+      salt_length: 16
+      parallelism: 8
+      memory: 128
+
+access_control:
+  default_policy: deny
+  rules:
+    - domain: public.{{ traefik_master_main_domain }}
+      policy: bypass
+    - domain: {{ traefik_master_main_domain }}
+      policy: bypass
+
+    - domain: traefik.{{ traefik_master_main_domain }}
+      policy: two_factor
+      subject:
+        - "group:admins"
+
+    - domain: dl.{{ traefik_master_main_domain }}
+      policy: two_factor
+      resources:
+        - "^/sonarr(/.*)?$"
+        - "^/radarr(/.*)?$"
+        - "^/lidarr(/.*)?$"
+      subject:
+        - "group:mediadl"
+
+    - domain: dl.{{ traefik_master_main_domain }}
+      policy: two_factor
+      resources:
+        - "^/hydra(/.*)?$"
+        - "^/nzbget(/.*)?$"
+        - "^/bazarr(/.*)?$"
+      subject:
+        - "group:admins"
+
+    - domain: grafana.{{ traefik_master_main_domain }}
+      policy: two_factor
+      subject:
+        - "group:admins"
+
+    - domain: chronogaf.{{ traefik_master_main_domain }}
+      policy: two_factor
+      subject:
+        - "group:admins"
+
+session:
+  name: kreuder-xyz_session
+  expiration: 3600 # 1 hour
+  inactivity: 300 # 5 minutes
+  remember_me_duration: 1M
+  domain: {{ traefik_master_main_domain }} # Should match whatever your root protected domain is
+
+  redis:
+    host: redis
+    port: 6379
+
+regulation:
+  max_retries: 3
+  find_time: 120
+  ban_time: 1d
+
+server:
+  read_buffer_size: 4096
+  write_buffer_size: 4096
+
+storage:
+  encryption_key: {{ authelia_storage_encryption_key }}
+  local:
+    path: /config/db.sqlite3
+notifier:
+  filesystem:
+    filename: /config/notification.txt
