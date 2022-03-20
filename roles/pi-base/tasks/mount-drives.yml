@@ -2,9 +2,9 @@
 - name: Mount up device by UUID
   when: mount_drives is defined
   ansible.posix.mount:
-    path: "{{ item.path }} "
+    path: "{{ item.path }}"
     src: "{{ item.src }}"
     fstype: "{{ item.fstype }}"
     opts: "{{ item.opts | default('defaults') }}"
-    state: present
+    state: mounted
   loop: "{{ mount_drives }}"
