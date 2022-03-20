@@ -1,0 +1,50 @@
+location:
+  source_directories:
+{% for source in borg_backup_source_paths %}
+    - "{{ source }}"
+{% endfor %}
+
+  repositories:
+{% for target in borg_backup_targets %}
+    - "{{ target }}"
+{% endfor %}
+
+  exclude_if_present:
+    - .nobackup
+
+{% if borg_exclude_patterns is defined %}
+  exclude_patterns:
+{% for pattern in borg_exclude_patterns %}
+    - "{{ pattern }}"
+{% endfor %}
+{% endif %}
+
+storage:
+  compression: auto,zstd
+  archive_name_format: '{hostname}-{now:%Y-%m-%d.%H}'
+  ssh_command: ssh -i {{ borgbackup_user.ssh_key_file }}
+{% if borg_backup_passphrase is defined %}
+  encryption_passphrase: "{{ borg_backup_passphrase }}"
+{% endif %}
+
+retention:
+  keep_daily: 7
+  keep_weekly: 4
+  keep_monthly: 6
+  keep_yearly: 1
+  prefix: '{hostname}-'
+
+consistency:
+  checks:
+    - repository
+    - archives
+  check_last: 3
+
+{% if backup_mysql_password is defined and backup_mysql_username is defined %}
+hooks:
+  mysql_databases:
+    - name: all
+      username: "{{ backup_mysql_username }}"
+      password: "{{ backup_mysql_password }}"
+      options: "--default-character-set=utf8mb4 --add-drop-database --add-drop-table --add-locks --complete-insert --databases --lock-all-tables --create-options --disable-keys --quick --order-by-primary --set-charset --tz-utc"
+{% endif %}
