@@ -4,13 +4,30 @@
   gather_facts: no
   roles:
     - initialuser
+  tags:
+    - base
 
 - name: pibase
   hosts: sbcs
   roles:
     - pi-base
+  tags:
+    - base
 
 - name: Pihole
   hosts: bpi1
   roles:
     - pihole
+  tags: pihole
+
+- name: Hasspi
+  hosts: homeassistantPi
+  roles:
+    - role: backup
+      tags: borg
+    - role: fanshim
+      tags: fanshim
+    - role: dockerdaemon
+      tags: docker
+    - role: traefik_master
+      tags: traefik_master
