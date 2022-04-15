@@ -1,8 +1,8 @@
 - name: Restart Unbound
-  service:
+  ansible.builtin.service:
     name: unbound
     state: restarted
 
 - name: Pihole reload
-  command: "pihole -g"
+  ansible.builtin.command: "pihole -g"
   when: pihole_installed

@@ -1,6 +1,6 @@
 ---
 - name: Set Facts
-  set_fact:
+  ansible.builtin.set_fact:
     stack_folder: /opt/traefik_master
 
 - name: Ensure stack_folder
@@ -12,14 +12,14 @@
     mode: 0770
 
 - name: Copy Docker-Compose.yml
-  template:
+  ansible.builtin.template:
     src: docker-compose.yml.j2
     dest: "{{ stack_folder }}/docker-compose.yml"
     mode: 0600
     owner: "{{ ansible_user }}"
 
 - name: Copy .env
-  template:
+  ansible.builtin.template:
     src: .env.j2
     dest: "{{ stack_folder }}/.env"
     mode: 0600
@@ -27,7 +27,7 @@
 
 - name: Ensure Volume Folders Exists
   become: yes
-  file:
+  ansible.builtin.file:
     path: "{{ item }}"
     state: directory
     owner: "{{ ansible_user }}"
@@ -39,21 +39,21 @@
     - "{{ traefik_master_docker_volumes_dir }}/redis"
 
 - name: Copy Traefik Dynamic Conf
-  template:
+  ansible.builtin.template:
     src: traefik-dynamic.yml.j2
     dest: "{{ traefik_master_docker_volumes_dir }}/traefik/dynamic/dynamic.yml"
     mode: 0600
     owner: "{{ ansible_user }}"
 
 - name: Copy Traefik Static Conf
-  template:
+  ansible.builtin.template:
     src: traefik-static.yml.j2
     dest: "{{ traefik_master_docker_volumes_dir }}/traefik/traefik.yml"
     mode: 0600
     owner: "{{ ansible_user }}"
 
 - name: Copy Authelia Conf
-  template:
+  ansible.builtin.template:
     src: authelia_config.yml.j2
     dest: "{{ traefik_master_docker_volumes_dir }}/authelia/configuration.yml"
     mode: 0600
@@ -61,14 +61,14 @@
 
 - name: Install ddclient
   become: yes
-  package:
+  ansible.builtin.package:
     name: ddclient
     state: present
   when: ddclient_config is defined
 
 - name: Copy ddclient Conf
   become: yes
-  blockinfile:
+  ansible.builtin.blockinfile:
     path: /etc/ddclient.conf
     block: "{{ ddclient_config }}"
     create: yes

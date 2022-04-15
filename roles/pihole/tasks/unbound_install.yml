@@ -1,17 +1,17 @@
 ---
 - name: Install Unbound Recursive DNS
-  apt:
+  ansible.builtin.apt:
     name: "unbound"
     state: present
 
 - name: Template Unbound Config
-  template:
+  ansible.builtin.template:
     src: unbound-pihole.conf.j2
     dest: /etc/unbound/unbound.conf.d/pi-hole.conf
   notify: Restart Unbound
 
 - name: Disable Ubound Resolved
-  service:
+  ansible.builtin.service:
     name: unbound-resolvconf
     state: stopped
     enabled: no

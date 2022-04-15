@@ -1,10 +1,10 @@
 ---
 - name: "Register username var"
-  set_fact:
+  ansible.builtin.set_fact:
     username: "{{ ansible_user }}"
 
 - name: "Ensure Initial_User"
-  set_fact:
+  ansible.builtin.set_fact:
     initial_user: "{{ initial_user | default('root') }}"
 
 - name: "Check if User '{{ ansible_user }}' exists"
@@ -13,14 +13,14 @@
     ansible_become_pass: ""
   block:
     - name: "Wait for Connection on User {{ ansible_user }} --> may fail when user needs init"
-      wait_for_connection:
+      ansible.builtin.wait_for_connection:
         timeout: 2
     - name: "Need Init: False"
-      set_fact:
+      ansible.builtin.set_fact:
         needs_init: false
   rescue:
     - name: "Need Init: True"
-      set_fact:
+      ansible.builtin.set_fact:
         needs_init: true
 
 - name: Create New user
@@ -34,18 +34,18 @@
       failed_when: false
 
 - name: Flush Handlers
-  meta: flush_handlers
+  ansible.builtin.meta: flush_handlers
 
 - name: Make sure further ssh connections dont use passwords
-  set_fact:
+  ansible.builtin.set_fact:
     ansible_ssh_pass: ""
     ansible_become_pass: ""
 
 - name: reset ssh connection
-  meta: reset_connection
+  ansible.builtin.meta: reset_connection
 
 - name: Ensure Authorized Keys
-  authorized_key:
+  ansible.builtin.authorized_key:
     user: "{{ ansible_user }}"
     key: "{{ ansible_user_pubkeys }}"
     exclusive: yes
@@ -54,7 +54,7 @@
 
 - name: "Remove Default user {{ initial_user }}"
   become: yes
-  user:
+  ansible.builtin.user:
     name: "{{ initial_user }}"
     state: absent
     remove: yes

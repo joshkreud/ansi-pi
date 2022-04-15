@@ -1,7 +1,7 @@
 ---
 - name: Install Borgbackup
   become: yes
-  package:
+  ansible.builtin.package:
     name:
       - borgbackup
       - jq
@@ -9,7 +9,7 @@
 
 - name: ensure Pip Packages installed
   become: yes
-  import_role:
+  ansible.builtin.import_role:
     name: geerlingguy.pip
   vars:
     pip_install_packages:
@@ -17,7 +17,7 @@
 
 - name: "Create Backup User"
   become: yes
-  user:
+  ansible.builtin.user:
     name: "borgbackup"
     generate_ssh_key: yes
     ssh_key_type: ed25519
@@ -31,7 +31,7 @@
 
 - name: Borgmatic Config Folder
   become: true
-  file:
+  ansible.builtin.file:
     path: "/etc/borgmatic"
     state: directory
     owner: "{{ borgbackup_user.name }}"
@@ -40,14 +40,14 @@
 
 - name: Gather Borgbackup Public Keys
   when: borg_backup_authorize_hosts is defined
-  set_fact:
+  ansible.builtin.set_fact:
     borg_backup_authorize_public_keys: "{{ hostvars[item].borgbackup_user.ssh_public_key }}"
   loop: "{{ borg_backup_authorize_hosts }}"
 
 - name: Authorize Borg Hosts
   when: borg_backup_authorize_hosts is defined
   become: yes
-  authorized_key:
+  ansible.builtin.authorized_key:
     user: "{{ borgbackup_user.name }}"
     state: present
     key: "{{ borg_backup_authorize_public_keys | default([]) | join(\n) }}\n{{ borgbackup_user.ssh_public_key }}"
@@ -55,7 +55,7 @@
 
 - name: Template Borgmatic Config
   become: yes
-  template:
+  ansible.builtin.template:
     src: borgmatic-config.yml.j2
     dest: /etc/borgmatic/config.yaml
     owner: "{{ borgbackup_user.name }}"
@@ -64,7 +64,7 @@
 
 - name: Set Backup Cron Job
   become: yes
-  cron:
+  ansible.builtin.cron:
     name: "Borg Backup"
     minute: "47"
     hour: "4"

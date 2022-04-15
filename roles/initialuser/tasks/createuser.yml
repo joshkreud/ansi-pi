@@ -4,12 +4,12 @@
 # Ensure the facts are gathered now.
 
 - name: "gather facts"
-  setup:
+  ansible.builtin.setup:
     gather_subset: all
 
 - name: "create ansible user: {{ username }}"
   become: true
-  user:
+  ansible.builtin.user:
     name: "{{ username }}"
     create_home: yes
     state: present
@@ -17,20 +17,20 @@
   register: newuser
 
 - name: "Ensure .ssh directory"
-  file:
+  ansible.builtin.file:
     path: /home/{{ username }}/.ssh
     state: directory
     mode: 0700
     owner: "{{ username }}"
 
 - name: Check initial_user Authorized keys
-  stat:
+  ansible.builtin.stat:
     path: /home/{{ ansible_user }}/.ssh/authorized_keys
   register: initial_authorized_keys
 
 - name: Copy Authorized keys from initial_user
   when: initial_authorized_keys.stat.exists
-  copy:
+  ansible.builtin.copy:
     remote_src: yes
     src: /home/{{ ansible_user }}/.ssh/authorized_keys
     dest: /home/{{ username }}/.ssh/authorized_keys
@@ -39,7 +39,7 @@
   notify: restart sshd
 
 - name: Seed Authorized Keys
-  authorized_key:
+  ansible.builtin.authorized_key:
     user: "{{ username }}"
     key: "{{ ansible_user_pubkeys }}"
     exclusive: yes
@@ -47,7 +47,7 @@
   notify: restart sshd
 
 - name: "Allow sudo for user: {{ username }}"
-  copy:
+  ansible.builtin.copy:
     content: "{{ username }} ALL=(ALL) NOPASSWD: ALL"
     dest: "/etc/sudoers.d/{{ username }}"
     mode: 0600

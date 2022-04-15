@@ -7,7 +7,7 @@
   import_tasks: basic-setup-hostname.yml
 
 - name: Make Bashcompletion on anible user case insensitive
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/inputrc
     regexp: "^set completion-ignore-case"
     line: set completion-ignore-case On
@@ -20,18 +20,18 @@
     reload: yes
 
 - name: packages | ensure apt list dir exists
-  file:
+  ansible.builtin.file:
     path: /var/lib/apt/lists/
     state: directory
     mode: 0755
 
 - name: Update Apt Cache
-  apt:
+  ansible.builtin.apt:
     cache_valid_time: 3600
     update_cache: yes
 
 - name: Install Basic Packages
-  package:
+  ansible.builtin.package:
     name: "{{ item }}"
     state: present
   with_items:
@@ -45,7 +45,7 @@
     - "acl" #To prevent some ansible permission errors
 
 - name: Update all packages to their latest version
-  apt:
+  ansible.builtin.apt:
     update_cache: yes
     upgrade: "yes"
   tags:
@@ -53,13 +53,13 @@
     - apt-upgrade
 
 - name: Set Max journal log size
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/systemd/journald.conf
     line: SystemMaxUse=200M
   notify: restart journald
 
 - name: Set includedir in sudoers
-  lineinfile:
+  ansible.builtin.lineinfile:
     dest: /etc/sudoers
     line: "#includedir /etc/sudoers.d"
     state: present

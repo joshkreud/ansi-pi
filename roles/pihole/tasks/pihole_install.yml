@@ -1,11 +1,11 @@
 ---
 - name: create pihole directory
-  file:
+  ansible.builtin.file:
     path: /etc/pihole
     state: directory
 
 - name: Check Pihole Installed
-  stat:
+  ansible.builtin.stat:
     path: /usr/local/bin/pihole
   register: pihole_binary
 
@@ -14,18 +14,18 @@
     pihole_installed: "{{ pihole_binary.stat.exists | default(false) }}"
 
 - name: copy pihole conf
-  template:
+  ansible.builtin.template:
     src: pihole-setupVars.conf
     dest: /etc/pihole/setupVars.conf
   notify: Pihole reload
 
 - name: download install script
-  get_url:
+  ansible.builtin.get_url:
     url: https://raw.githubusercontent.com/pi-hole/pi-hole/master/automated%20install/basic-install.sh
     dest: ~/pihole-install.sh
     mode: u+rwx
   when: not pihole_installed
 
 - name: run install script
-  shell: ~/pihole-install.sh --unattended
+  ansible.builtin.shell: ~/pihole-install.sh --unattended
   when: not pihole_installed

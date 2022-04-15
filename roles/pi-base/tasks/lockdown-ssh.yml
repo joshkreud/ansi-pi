@@ -1,6 +1,6 @@
 ---
 - name: Disable SSH Password Authentication
-  lineinfile:
+  ansible.builtin.lineinfile:
     dest: /etc/ssh/sshd_config
     regexp: "PasswordAuthentication"
     line: "PasswordAuthentication no"
@@ -11,7 +11,7 @@
     - restart ssh
 
 - name: Disable SSH Root Login
-  lineinfile:
+  ansible.builtin.lineinfile:
     dest: /etc/ssh/sshd_config
     regexp: "^PermitRootLogin"
     line: "PermitRootLogin no"
@@ -22,7 +22,7 @@
     - restart ssh
 
 - name: SSH Enable Agent forwarding
-  lineinfile:
+  ansible.builtin.lineinfile:
     dest: /etc/ssh/sshd_config
     regexp: "^AllowAgentForwarding"
     line: "AllowAgentForwarding yes"
@@ -32,7 +32,7 @@
     - restart ssh
 
 - name: Make sure SSH Agent forwarding also works on sudo
-  lineinfile:
+  ansible.builtin.lineinfile:
     dest: /etc/sudoers.d/ssh_key_forward
     line: 'Defaults    env_keep += "SSH_AUTH_SOCK"'
     state: present
