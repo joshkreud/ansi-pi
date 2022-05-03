@@ -18,6 +18,7 @@
   hosts: bpi1
   roles:
     - pihole
+    - ddclient
   tags: pihole
 
 - name: Hasspi

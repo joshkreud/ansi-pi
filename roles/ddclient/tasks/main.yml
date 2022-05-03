@@ -1,0 +1,23 @@
+---
+- name: Ensure DDclient installed
+  become: yes
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - ddclient
+    - libjson-any-perl
+    - libio-socket-ssl-perl
+
+- name: Ensure Ddclinet config
+  become: yes
+  ansible.builtin.copy:
+    dest: /etc/ddclient.conf
+    owner: root
+    group: root
+    mode: 0600
+    content: "{{ ddclient_config }}"
+  notify: Restart ddclient
+
+- name: Flush handlers
+  ansible.builtin.meta: flush_handlers

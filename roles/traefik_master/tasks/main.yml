@@ -59,29 +59,6 @@
     mode: 0600
     owner: "{{ ansible_user }}"
 
-- name: Install ddclient
-  become: yes
-  ansible.builtin.package:
-    name: ddclient
-    state: present
-  when: ddclient_config is defined
-
-- name: Copy ddclient Conf
-  become: yes
-  ansible.builtin.blockinfile:
-    path: /etc/ddclient.conf
-    block: "{{ ddclient_config }}"
-    create: yes
-    owner: root
-    mode: 0600
-  when: ddclient_config is defined
-
-- name: Ddclient Cron
-  become: yes
-  when: ddclient_config is defined
-  ansible.builtin.cron:
-    name: "Ddclient"
-    job: /usr/sbin/ddclient --force
-    state: present
-    minute: "2"
-    hour: "/1"
+- name: Docker Compose Up
+  community.docker.docker_compose:
+    project_src: "{{ stack_folder }}"
