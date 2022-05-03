@@ -21,8 +21,8 @@
     - ddclient
   tags: pihole
 
-- name: Hasspi
-  hosts: homeassistantPi
+- name: gatewaypi1
+  hosts: gatewaypi1
   roles:
     - role: backup
       tags: borg

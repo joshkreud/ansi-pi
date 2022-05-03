@@ -25,8 +25,6 @@ authentication_backend:
 access_control:
   default_policy: deny
   rules:
-    - domain: public.{{ traefik_master_main_domain }}
-      policy: bypass
     - domain: {{ traefik_master_main_domain }}
       policy: bypass
 

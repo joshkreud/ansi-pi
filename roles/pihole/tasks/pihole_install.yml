@@ -1,8 +1,12 @@
 ---
 - name: create pihole directory
+  become: yes
   ansible.builtin.file:
     path: /etc/pihole
     state: directory
+    owner: root
+    group: root
+    mode: 0777
 
 - name: Check Pihole Installed
   ansible.builtin.stat:
@@ -14,9 +18,13 @@
     pihole_installed: "{{ pihole_binary.stat.exists | default(false) }}"
 
 - name: copy pihole conf
+  become: yes
   ansible.builtin.template:
     src: pihole-setupVars.conf
     dest: /etc/pihole/setupVars.conf
+    owner: root
+    group: root
+    mode: 0644
   notify: Pihole reload
 
 - name: download install script
@@ -27,5 +35,6 @@
   when: not pihole_installed
 
 - name: run install script
-  ansible.builtin.shell: ~/pihole-install.sh --unattended
+  become: yes
+  ansible.builtin.command: ~/pihole-install.sh --unattended
   when: not pihole_installed

@@ -1,17 +1,33 @@
 ---
 - name: Install Unbound Recursive DNS
+  become: yes
   ansible.builtin.apt:
     name: "unbound"
     state: present
 
 - name: Template Unbound Config
+  become: yes
   ansible.builtin.template:
     src: unbound-pihole.conf.j2
     dest: /etc/unbound/unbound.conf.d/pi-hole.conf
+    owner: root
+    group: root
+    mode: 0644
   notify: Restart Unbound
 
 - name: Disable Ubound Resolved
+  become: yes
   ansible.builtin.service:
     name: unbound-resolvconf
     state: stopped
     enabled: no
+
+- name: FTL Edns limit
+  become: yes
+  ansible.builtin.lineinfile:
+    path: /etc/dnsmasq.d/99-edns.conf
+    line: edns-packet-max=1232
+    create: yes
+    owner: root
+    group: root
+    mode: 0644

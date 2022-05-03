@@ -3,3 +3,6 @@
   include_tasks: pihole_install.yml
 - name: Install Unbound
   include_tasks: unbound_install.yml
+
+- name: Flush handlers
+  ansible.builtin.meta: flush_handlers

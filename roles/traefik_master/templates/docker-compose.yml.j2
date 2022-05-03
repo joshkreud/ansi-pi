@@ -112,10 +112,7 @@ services:
       traefik_sock: null
       traefik_int:
         ipv4_address: 172.18.0.2
-      smarthome_traefik:
-        ipv4_address: 172.20.0.2
-      monitor_traefik:
-        ipv4_address: 172.25.0.2
+      traefik: null
     extra_hosts:
       - host.docker.internal:172.17.0.1
     labels:
@@ -129,22 +126,6 @@ services:
       - traefik.http.routers.traefik.middlewares=authelia@file,secheader@file
       - traefik.http.services.traefik.loadbalancer.server.port=8080
       - traefik.http.services.traefik.loadbalancer.server.scheme=http
-
-  public:
-    image: traefik/whoami
-    container_name: public
-    networks:
-      traefik_int:
-        ipv4_address: 172.18.0.15
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.public.rule=Host(`public.${DOMAINNAME}`)"
-      - "traefik.http.routers.public.entrypoints=websecure"
-      - "traefik.http.routers.public.middlewares=authelia@file,secheader@file"
-      - traefik.docker.network=traefik_int
-    expose:
-      - 80
-    restart: unless-stopped
 
   staticroot:
     image: nginx:alpine
@@ -177,18 +158,11 @@ networks:
       config:
         - subnet: 172.18.0.1/24
 
-  smarthome_traefik:
+  traefik:
     driver: bridge
-    name: smarthome_traefik
+    name: traefik
     ipam:
       driver: default
       config:
         - subnet: 172.20.0.1/24
 
-  monitor_traefik:
-    driver: bridge
-    name: monitor_traefik
-    ipam:
-      driver: default
-      config:
-        - subnet: 172.25.0.1/24
