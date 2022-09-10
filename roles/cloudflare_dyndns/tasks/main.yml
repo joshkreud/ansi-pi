@@ -1,0 +1,25 @@
+---
+- name: Install Cloudflare Update Requirements
+  become: yes
+  ansible.builtin.apt:
+    name:
+      - curl
+      - dnsutils
+      - jq
+    state: present
+
+- name: Copy Update Script
+  become: yes
+  ansible.builtin.template:
+    src: update_cloudflare_dns.sh.j2
+    dest: /usr/local/sbin/update_cloudflare_dns
+    mode: 0700
+    owner: root
+    group: root
+
+- name: Ensure that the IP is updated every 30mins
+  become: true
+  ansible.builtin.cron:
+    name: "Update Cloudflare DDNS"
+    minute: "/42"
+    job: "update_cloudflare_dns logger -p cloudflare.dns.update"
