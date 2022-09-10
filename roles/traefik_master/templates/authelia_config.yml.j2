@@ -32,6 +32,9 @@ access_control:
       policy: bypass
 
     - domain: traefik.{{ traefik_master_main_domain }}
+      policy: bypass
+
+    - domain: home.{{ traefik_master_main_domain }}
       policy: two_factor
       subject:
         - "group:admins"

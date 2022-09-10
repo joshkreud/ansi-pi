@@ -33,3 +33,23 @@
       tags: docker
     - role: traefik_master
       tags: traefik
+
+  tasks:
+    - name: Link Homeassistant To Traefik
+      tags: traefik
+      ansible.builtin.copy:
+        dest: "{{ traefik_master_docker_volumes_dir }}/traefik/dynamic/homeassistant.yml"
+        mode: 0655
+        owner: "{{ ansible_user }}"
+        content: |
+          http:
+            routers:
+              homeassistant-1:
+                rule: "Host(`home.{{ traefik_master_main_domain }}`)"
+                service: "homeassistant-1"
+                entrypoints: websecure
+            services:
+              homeassistant-1:
+                loadbalancer:
+                  servers:
+                    - url: "http://192.168.178.59:8123/"

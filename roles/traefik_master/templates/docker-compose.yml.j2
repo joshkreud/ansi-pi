@@ -95,7 +95,7 @@ services:
     volumes:
       # create these toml files first
       - ${CONF_DIR}/traefik/acme:/etc/traefik/acme
-      - ${CONF_DIR}/traefik/dynamic/dynamic.yml:/etc/traefik/conf/dynamic.yml
+      - ${CONF_DIR}/traefik/dynamic/:/etc/traefik/conf/dynamic/
       - ${CONF_DIR}/traefik/traefik.yml:/etc/traefik/traefik.yml
       - ${CONF_DIR}/traefik/auth:/etc/traefik/auth
       - ${CONF_DIR}/traefik/log:/var/log
