@@ -5,14 +5,17 @@
 server:
   host: 0.0.0.0
   port: 9091
+  read_buffer_size: 4096
+  write_buffer_size: 4096
 log:
   level: info
-default_redirection_url: https://public.{{ traefik_master_main_domain }}
+default_redirection_url: https://{{ traefik_master_main_domain }}
 totp:
   issuer: authelia.com
 
 authentication_backend:
-  disable_reset_password: true
+  password_reset:
+    disable: true
   file:
     path: /config/users_database.yml
     password:
@@ -76,10 +79,6 @@ regulation:
   max_retries: 3
   find_time: 120
   ban_time: 1d
-
-server:
-  read_buffer_size: 4096
-  write_buffer_size: 4096
 
 storage:
   encryption_key: {{ authelia_storage_encryption_key }}

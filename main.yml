@@ -18,12 +18,13 @@
   hosts: bpi1
   roles:
     - pihole
-    - ddclient
   tags: pihole
 
 - name: gatewaypi1
   hosts: gatewaypi1
   roles:
+    - role: cloudflare_dyndns
+      tags: ddns
     - role: backup
       tags: borg
     - role: fanshim
@@ -31,4 +32,4 @@
     - role: dockerdaemon
       tags: docker
     - role: traefik_master
-      tags: traefik_master
+      tags: traefik

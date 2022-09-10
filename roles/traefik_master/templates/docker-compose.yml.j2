@@ -11,7 +11,6 @@ secrets:
 services:
   authelia:
     image: authelia/authelia
-    container_name: authelia
     depends_on:
       - redis
     secrets:
@@ -19,7 +18,7 @@ services:
       - session
       - redis_password
     volumes:
-      - ${CONF_DIR}/authelia:/config
+      - ${CONF_DIR}/authelia/config:/config
     networks:
       traefik_int:
         ipv4_address: 172.18.0.5
@@ -42,7 +41,6 @@ services:
     image: "redis"
     secrets:
       - redis_password
-    container_name: authelia_redis
     restart: unless-stopped
     expose:
       - 6379
@@ -50,7 +48,7 @@ services:
       [
         "sh",
         "-c",
-        'redis-server /usr/local/etc/redis/redis.conf --appendonly yes --requirepass "$$(cat /run/secrets/redis_password)"',
+        'redis-server /usr/local/etc/redis/redis.conf --appendonly yes --requirepass "$$(cat /run/secrets/redis_password)"'
       ]
     volumes:
       - ${CONF_DIR}/redis/auth/dat:/redis_data
@@ -62,7 +60,6 @@ services:
         ipv4_address: 172.18.0.6
 
   dockerproxy_traefik:
-    container_name: docker_socket_proxy_traefik
     image: tecnativa/docker-socket-proxy:latest
     restart: always
     networks:
@@ -86,13 +83,10 @@ services:
       - CONTAINERS=1 # Traefik, portainer, etc.
 
   traefik:
-    hostname: traefik
-    image: traefik:2.6
-    container_name: traefik
+    image: traefik:2.8
     restart: always
     environment:
-      - CF_API_EMAIL
-      - CF_API_KEY
+      - CF_DNS_API_TOKEN
     depends_on:
       - dockerproxy_traefik
       - authelia
@@ -114,9 +108,8 @@ services:
         ipv4_address: 172.18.0.2
       traefik: null
     extra_hosts:
-      - host.docker.internal:172.17.0.1
+      - "host.docker.internal:host-gateway"
     labels:
-      - com.centurylinklabs.watchtower.enable=true
       - traefik.enable=true
 
       # Traefik Dashboard
@@ -129,7 +122,6 @@ services:
 
   staticroot:
     image: nginx:alpine
-    container_name: static_file_root
     networks:
       traefik_int:
         ipv4_address: 172.18.0.16
@@ -165,4 +157,3 @@ networks:
       driver: default
       config:
         - subnet: 172.20.0.1/24
-

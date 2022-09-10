@@ -19,13 +19,14 @@
     owner: "{{ ansible_user }}"
 
 - name: Copy .env
+  become: yes
   ansible.builtin.template:
     src: .env.j2
     dest: "{{ stack_folder }}/.env"
     mode: 0600
     owner: "{{ ansible_user }}"
 
-- name: Ensure Volume Folders Exists
+- name: Ensure User Volume Folders Exists
   become: yes
   ansible.builtin.file:
     path: "{{ item }}"
@@ -34,9 +35,35 @@
     mode: 0770
   loop:
     - "{{ traefik_master_docker_volumes_dir }}/traefik/dynamic"
-    - "{{ traefik_master_docker_volumes_dir }}/authelia"
+    - "{{ traefik_master_docker_volumes_dir }}/authelia/secrets"
     - "{{ traefik_master_docker_volumes_dir }}/static"
-    - "{{ traefik_master_docker_volumes_dir }}/redis"
+    - "{{ traefik_master_docker_volumes_dir }}/redis/auth/secrets"
+
+- name: Ensure Root Volume Folders Exists
+  become: yes
+  ansible.builtin.file:
+    path: "{{ traefik_master_docker_volumes_dir }}/authelia/config"
+    state: directory
+    owner: "root"
+    mode: 0770
+
+- name: Ensure JWT Token
+  ansible.builtin.import_tasks: generate_secret.yml
+  vars:
+    path: "{{ traefik_master_docker_volumes_dir }}/authelia/secrets/jwt"
+    secret: "{{ lookup('password', '/dev/null chars=ascii_lowercase,digits length=64') }}"
+
+- name: Ensure Session Token
+  ansible.builtin.import_tasks: generate_secret.yml
+  vars:
+    path: "{{ traefik_master_docker_volumes_dir }}/authelia/secrets/session"
+    secret: "{{ lookup('password', '/dev/null chars=ascii_lowercase,digits length=64') }}"
+
+- name: Ensure Redis Password
+  ansible.builtin.import_tasks: generate_secret.yml
+  vars:
+    path: "{{ traefik_master_docker_volumes_dir }}/redis/auth/secrets/pass"
+    secret: "{{ lookup('password', '/dev/null chars=ascii_lowercase,digits length=64') }}"
 
 - name: Copy Traefik Dynamic Conf
   ansible.builtin.template:
@@ -53,12 +80,23 @@
     owner: "{{ ansible_user }}"
 
 - name: Copy Authelia Conf
+  become: yes
   ansible.builtin.template:
     src: authelia_config.yml.j2
-    dest: "{{ traefik_master_docker_volumes_dir }}/authelia/configuration.yml"
+    dest: "{{ traefik_master_docker_volumes_dir }}/authelia/config/configuration.yml"
     mode: 0600
-    owner: "{{ ansible_user }}"
+    owner: "root"
+
+- name: Copy Authelia Users DB
+  become: yes
+  ansible.builtin.copy:
+    src: authelia_users.yml
+    dest: "{{ traefik_master_docker_volumes_dir }}/authelia/config/users_database.yml"
+    mode: 0600
+    owner: "root"
 
 - name: Docker Compose Up
+  become: yes
   community.docker.docker_compose:
+    recreate: always
     project_src: "{{ stack_folder }}"

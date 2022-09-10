@@ -40,7 +40,7 @@ entryPoints:
 certificatesResolvers:
   cloudflare:
     acme:
-      email: {{ cloudflare_email }}
+      email: "{{ cloudflare_email }}"
       storage: /etc/traefik/acme/acme.json
       # caserver: "https://acme-staging-v02.api.letsencrypt.org/directory"
       dnsChallenge:
