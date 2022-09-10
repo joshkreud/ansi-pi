@@ -15,6 +15,7 @@
     name: geerlingguy.docker
   vars:
     docker_install_compose: false
+    docker_install_compose_plugin: true
 
 - name: reset ssh connection
   meta: reset_connection
