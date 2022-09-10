@@ -1,0 +1,8 @@
+users:
+  josh:
+    displayname: "Josh Kreuder"
+    password: $argon2id$v=19$m=65536,t=3,p=4$ZkNhY0KW4oH5M2sgMz429r7gsrLk1Y24r1M
+    email: email@example.com
+    groups:
+      - admins
+      - mediadl
