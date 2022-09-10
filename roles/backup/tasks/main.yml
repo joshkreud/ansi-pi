@@ -62,6 +62,25 @@
     group: "{{ borgbackup_user.name }}"
     mode: 0660
 
+- name: Ensure Borg SSH Targets are in Known Hosts
+  become: yes
+  when: borg_ssh_known_hosts
+  ansible.builtin.blockinfile:
+    path: /root/.ssh/known_hosts
+    block: "{{ borg_ssh_known_hosts }}"
+    create: yes
+    owner: root
+    mode: 0600
+
+
+- name: Ensure Borg repos initialized
+  become: yes
+  ansible.builtin.shell:
+    cmd: borgmatic init -e repokey
+  register: borg_init_command
+  changed_when: "'Write down the passphrase.' in borg_init_command.stderr"
+
+
 - name: Set Backup Cron Job
   become: yes
   ansible.builtin.cron:
