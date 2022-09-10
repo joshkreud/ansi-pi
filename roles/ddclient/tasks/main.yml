@@ -2,12 +2,11 @@
 - name: Ensure DDclient installed
   become: yes
   ansible.builtin.apt:
-    name: "{{ item }}"
+    name:
+      - ddclient
+      - libjson-pp-perl
+      - libio-socket-ssl-perl
     state: present
-  loop:
-    - ddclient
-    - libjson-any-perl
-    - libio-socket-ssl-perl
 
 - name: Ensure Ddclinet config
   become: yes
