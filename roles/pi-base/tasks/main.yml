@@ -1,19 +1,11 @@
 ---
 - name: Basic Setup
-  become: yes
-  import_tasks: basic-setup.yml
+  ansible.builtin.import_role:
+    name: joshkreud.base
 
 - name: Mount Drives
   become: yes
-  import_tasks: mount-drives.yml
-
-- name: Lockdown SSH
-  become: yes
-  import_tasks: lockdown-ssh.yml
-
-- name: Lockdown UFW
-  become: yes
-  import_tasks: lockdown-ufw.yml
+  ansible.builtin.import_tasks: mount-drives.yml
 
 - name: Flush handlers
   ansible.builtin.meta: flush_handlers
