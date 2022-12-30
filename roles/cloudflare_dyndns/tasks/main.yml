@@ -17,9 +17,9 @@
     owner: root
     group: root
 
-- name: Ensure that the IP is updated every 30mins
+- name: Ensure that the IP is updated by cron
   become: true
   ansible.builtin.cron:
     name: "Update Cloudflare DDNS"
-    minute: "/42"
-    job: "update_cloudflare_dns logger -p cloudflare.dns.update"
+    minute: "/2"
+    job: "/usr/local/sbin/update_cloudflare_dns | /usr/bin/logger -t cloudflare.dns.update"
