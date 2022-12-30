@@ -1,5 +1,5 @@
 ---
-- name: ensure Pip Packages installed
+- name: Ensure Pip Packages installed
   become: yes
   ansible.builtin.import_role:
     name: geerlingguy.pip
@@ -9,7 +9,7 @@
       - name: pyyaml
       - name: docker-compose
 
-- name: ensure Docker Installed
+- name: Ensure Docker Installed
   become: yes
   ansible.builtin.import_role:
     name: geerlingguy.docker
@@ -17,5 +17,5 @@
     docker_install_compose: false
     docker_install_compose_plugin: true
 
-- name: reset ssh connection
-  meta: reset_connection
+- name: Reset ssh connection
+  ansible.builtin.meta: reset_connection
