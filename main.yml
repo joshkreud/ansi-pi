@@ -3,7 +3,7 @@
   hosts: all
   gather_facts: no
   roles:
-    - initialuser
+    - joshkreud.initialuser
   tags:
     - base
 
