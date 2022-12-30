@@ -7,7 +7,7 @@
   tags:
     - base
 
-- name: pibase
+- name: Pibase
   hosts: sbcs
   roles:
     - pi-base
@@ -20,7 +20,7 @@
     - pihole
   tags: pihole
 
-- name: gatewaypi1
+- name: Gatewaypi1
   hosts: gatewaypi1
   roles:
     - role: cloudflare_dyndns
