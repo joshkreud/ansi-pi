@@ -32,12 +32,12 @@ access_control:
       policy: bypass
 
     - domain: traefik.{{ traefik_master_main_domain }}
-      policy: bypass
-
-    - domain: home.{{ traefik_master_main_domain }}
       policy: two_factor
       subject:
         - "group:admins"
+
+    - domain: home.{{ traefik_master_main_domain }}
+      policy: bypass
 
     - domain: dl.{{ traefik_master_main_domain }}
       policy: two_factor
@@ -58,11 +58,6 @@ access_control:
         - "group:admins"
 
     - domain: grafana.{{ traefik_master_main_domain }}
-      policy: two_factor
-      subject:
-        - "group:admins"
-
-    - domain: chronogaf.{{ traefik_master_main_domain }}
       policy: two_factor
       subject:
         - "group:admins"
