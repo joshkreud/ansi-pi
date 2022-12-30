@@ -1,31 +1,20 @@
 ---
 - name: Provision Initial User
-  hosts: all
+  hosts: gatewaypi1
   gather_facts: no
   roles:
     - joshkreud.initialuser
   tags:
     - base
 
-- name: Pibase
-  hosts: sbcs
-  roles:
-    - pi-base
-  tags:
-    - base
-
-- name: Pihole
-  hosts: bpi1
-  roles:
-    - pihole
-  tags: pihole
-
 - name: Gatewaypi1
   hosts: gatewaypi1
   roles:
+    - role: pi-base
+      tags: base
     - role: cloudflare_dyndns
       tags: ddns
-    - role: backup
+    - role: joshkreud.borgmatic
       tags: borg
     - role: fanshim
       tags: fanshim
