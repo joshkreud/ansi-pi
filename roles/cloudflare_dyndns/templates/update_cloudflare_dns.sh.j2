@@ -48,6 +48,12 @@ echo Current IP4 Address: $wanip4
 echo Current IP4 Record: $record_ip4
 echo ----------------------------------------
 
+if [ "$record_ip4" == "null" ]
+then
+  echo "Could not fetch Cloudflare Record: $record_name"
+  exit 1
+fi
+
 ## Check IPv4
 if [ $wanip4 = $record_ip4 ]; then
   echo IPv4 Record matches. Update not needed.
@@ -63,7 +69,7 @@ else
   )
 
   ## Build valid JSON for update
-  data_json="{\"type\":\"A\",\"name\":\"$record_name\",\"content\":\"$wanip4\"}"
+  data_json="{\"type\":\"A\",\"name\":\"$record_name\",\"content\":\"$wanip4\",\"ttl\":1}"
 
   ## Update record
   update_result=$(
