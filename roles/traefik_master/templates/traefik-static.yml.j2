@@ -33,9 +33,9 @@ entryPoints:
         # options: supersec
         certresolver: "cloudflare"
         domains:
-          - main: "*.{{ traefik_master_main_domain }}"
+          - main: "{{ cloudflare_ddns_zone_name }}"
             sans:
-              - "{{ traefik_master_main_domain }}"
+              -  "*.{{ traefik_master_main_domain }}"
 
 certificatesResolvers:
   cloudflare:
